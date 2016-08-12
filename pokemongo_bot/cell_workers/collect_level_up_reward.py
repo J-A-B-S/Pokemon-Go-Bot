@@ -1,3 +1,4 @@
+import logging
 from pokemongo_bot.base_task import BaseTask
 
 
@@ -8,6 +9,7 @@ class CollectLevelUpReward(BaseTask):
     previous_level = 0
 
     def initialize(self):
+        self.logger = logging.getLogger(type(self).__name__)
         self.current_level = self._get_current_level()
         self.previous_level = 0
 
@@ -46,13 +48,11 @@ class CollectLevelUpReward(BaseTask):
                     item['name'] = got_item
                     count = 'item_count' in item and item['item_count'] or 0
 
-            self.emit_event(
-                'level_up_reward',
-                formatted='Received level up reward: {items}',
-                data={
-                    'items': data
-                }
-            )
+                self.emit_event(
+                    'level_up_reward',
+                    formatted='Received level up reward:',
+                )
+                self.logger.info("\033[92m- " + str(got_item) + " x " + str(count) + "\033[0;0m")
 
     def _get_current_level(self):
         level = 0
