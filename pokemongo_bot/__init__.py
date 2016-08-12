@@ -674,7 +674,7 @@ class PokemonGoBot(object):
             self.logger.info('Platform: '+ _platform + ' Encrypt.so directory: '+ path)
             sys.exit(1)
         else:
-            self.logger.info('Found '+ file_name +'! Platform: ' + _platform + ' Encrypt.so directory: ' + path)
+            self.logger.info('\033[93mFound '+ file_name +'! Platform: ' + _platform + ' Encrypt.so directory: ' + path + "\033[0m")
 
         return full_path
 
@@ -728,54 +728,54 @@ class PokemonGoBot(object):
         if 'amount' in player['currencies'][1]:
             stardust = player['currencies'][1]['amount']
         self.logger.info('')
-        self.logger.info('--- {username} ---'.format(**player))
+        self.logger.info('\033[96m--- {username} ---\033[0m'.format(**player))
         self.get_player_info()
         self.logger.info(
-            'Pokemon Bag: {}/{}'.format(
+            '\033[96mPokemon Bag: {}/{}\033[0m'.format(
                 self.get_inventory_count('pokemon'),
                 player['max_pokemon_storage']
             )
         )
         self.logger.info(
-            'Items: {}/{}'.format(
+            '\033[96mItems: {}/{}\033[0m'.format(
                 self.get_inventory_count('item'),
                 player['max_item_storage']
             )
         )
         self.logger.info(
-            'Stardust: {}'.format(stardust) +
-            ' | Pokecoins: {}'.format(pokecoins)
+            '\033[96mStardust: {}'.format(stardust) +
+            ' | Pokecoins: {} \033[0m'.format(pokecoins)
         )
         # Items Output
         self.logger.info(
-            'PokeBalls: ' + str(items_stock[1]) +
+            '\033[96mPokeballs: ' + str(items_stock[1]) +
             ' | GreatBalls: ' + str(items_stock[2]) +
-            ' | UltraBalls: ' + str(items_stock[3]))
+            ' | UltraBalls: {} \033[0m'.format(str(items_stock[3])))
 
         self.logger.info(
-            'RazzBerries: ' + str(items_stock[701]) +
+            '\033[96mRazzBerries: ' + str(items_stock[701]) +
             ' | BlukBerries: ' + str(items_stock[702]) +
-            ' | NanabBerries: ' + str(items_stock[703]))
+            ' | NanabBerries: {} \033[0m'.format(str(items_stock[703])))
 
         self.logger.info(
-            'LuckyEgg: ' + str(items_stock[301]) +
+            '\033[96mLuckyEgg: ' + str(items_stock[301]) +
             ' | Incubator: ' + str(items_stock[902]) +
-            ' | TroyDisk: ' + str(items_stock[501]))
+            ' | TroyDisk: {} \033[0m'.format(str(items_stock[501])))
 
         self.logger.info(
-            'Potion: ' + str(items_stock[101]) +
+            '\033[96mPotion: ' + str(items_stock[101]) +
             ' | SuperPotion: ' + str(items_stock[102]) +
             ' | HyperPotion: ' + str(items_stock[103]) +
-            ' | MaxPotion: ' + str(items_stock[104]))
+            ' | MaxPotion: {} \033[0m'.format(str(items_stock[104])))
 
         self.logger.info(
-            'Incense: ' + str(items_stock[401]) +
+            '\033[96mIncense: ' + str(items_stock[401]) +
             ' | IncenseSpicy: ' + str(items_stock[402]) +
-            ' | IncenseCool: ' + str(items_stock[403]))
+            ' | IncenseCool: {} \033[0m'.format(str(items_stock[403])))
 
         self.logger.info(
-            'Revive: ' + str(items_stock[201]) +
-            ' | MaxRevive: ' + str(items_stock[202]))
+            '\033[96mRevive: ' + str(items_stock[201]) +
+            ' | MaxRevive: {} \033[0m'.format(str(items_stock[202])))
 
         self.logger.info('')
 
@@ -1040,20 +1040,20 @@ class PokemonGoBot(object):
 
                     if 'level' in playerdata and 'experience' in playerdata:
                         self.logger.info(
-                            'Level: {level}'.format(
+                            '\033[96mLevel: {level}'.format(
                                 **playerdata) +
                             ' (Next Level: {} XP)'.format(
                                 nextlvlxp) +
-                            ' (Total: {experience} XP)'
+                            ' (Total: {experience} XP)\033[0m'
                             ''.format(**playerdata))
 
                     if 'pokemons_captured' in playerdata and 'poke_stop_visits' in playerdata:
                         self.logger.info(
-                            'Pokemon Captured: '
+                            '\033[96mPokemon Captured: '
                             '{pokemons_captured}'.format(
                                 **playerdata) +
                             ' | Pokestops Visited: '
-                            '{poke_stop_visits}'.format(
+                            '{poke_stop_visits} \033[0m'.format(
                                 **playerdata))
 
     def has_space_for_loot(self):

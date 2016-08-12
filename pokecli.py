@@ -63,7 +63,7 @@ def main():
     bot = False
 
     try:
-        logger.info('PokemonGO Bot v1.0')
+        logger.info('\033[92mPokemonGO Bot v1.0\033[0m')
         sys.stdout = codecs.getwriter('utf8')(sys.stdout)
         sys.stderr = codecs.getwriter('utf8')(sys.stderr)
 
@@ -71,7 +71,8 @@ def main():
         if not config:
             return
 
-        logger.info('Configuration initialized')
+        logger.info('\033[97mConfiguration initialized\033[0m')
+        logger.info('')
         health_record = BotEvent(config)
         health_record.login_success()
 
@@ -147,20 +148,20 @@ def report_summary(bot):
     metrics = bot.metrics
     metrics.capture_stats()
     logger.info('')
-    logger.info('Ran for {}'.format(metrics.runtime()))
-    logger.info('Total XP Earned: {}  Average: {:.2f}/h'.format(metrics.xp_earned(), metrics.xp_per_hour()))
-    logger.info('Travelled {:.2f}km'.format(metrics.distance_travelled()))
-    logger.info('Visited {} stops'.format(metrics.visits['latest'] - metrics.visits['start']))
-    logger.info('Encountered {} pokemon, {} caught, {} released, {} evolved, {} never seen before'
+    logger.info('\033[96mRan for {}\033[0m'.format(metrics.runtime()))
+    logger.info('\033[96mTotal XP Earned: {}  Average: {:.2f}/h \033[0m'.format(metrics.xp_earned(), metrics.xp_per_hour()))
+    logger.info('\033[96mTravelled {:.2f}km \033[0m'.format(metrics.distance_travelled()))
+    logger.info('\033[96mVisited {} stops \033[0m'.format(metrics.visits['latest'] - metrics.visits['start']))
+    logger.info('\033[96mEncountered {} pokemon, {} caught, {} released, {} evolved, {} never seen before \033[0m'
                 .format(metrics.num_encounters(), metrics.num_captures(), metrics.releases,
                         metrics.num_evolutions(), metrics.num_new_mons()))
-    logger.info('Threw {} pokeball{}'.format(metrics.num_throws(), '' if metrics.num_throws() == 1 else 's'))
-    logger.info('Earned {} Stardust'.format(metrics.earned_dust()))
+    logger.info('\033[96mThrew {} pokeball{} \033[0m'.format(metrics.num_throws(), '' if metrics.num_throws() == 1 else 's'))
+    logger.info('\033[96mEarned {} Stardust \033[0m'.format(metrics.earned_dust()))
     logger.info('')
     if metrics.highest_cp is not None:
-        logger.info('Highest CP Pokemon: {}'.format(metrics.highest_cp['desc']))
+        logger.info('\033[96mHighest CP Pokemon: {} \033[0m'.format(metrics.highest_cp['desc']))
     if metrics.most_perfect is not None:
-        logger.info('Most Perfect Pokemon: {}'.format(metrics.most_perfect['desc']))
+        logger.info('\033[96mMost Perfect Pokemon: {} \033[0m'.format(metrics.most_perfect['desc']))
 
 def init_config():
     parser = argparse.ArgumentParser()
@@ -190,10 +191,10 @@ def init_config():
     if config_arg and os.path.isfile(config_arg):
         _json_loader(config_arg)
     elif os.path.isfile(config_file):
-        logger.info('No config argument specified, checking for /configs/config.json')
+        logger.info('\033[91mNo config argument specified, checking for /configs/config.json\033[0m')
         _json_loader(config_file)
     else:
-        logger.info('Error: No /configs/config.json or specified config')
+        logger.info('\033[91mError: No /configs/config.json or specified config\033[0m')
 
     # Read passed in Arguments
     required = lambda x: not x in load
