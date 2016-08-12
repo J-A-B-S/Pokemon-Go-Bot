@@ -2,6 +2,7 @@
 from __future__ import unicode_literals
 
 import time
+import logging
 
 from pgoapi.utilities import f2i
 
@@ -17,6 +18,7 @@ class SpinFort(BaseTask):
 
     def initialize(self):
         self.ignore_item_count = self.config.get("ignore_item_count", False)
+        self.logger = logging.getLogger(type(self).__name__)
 
     def should_run(self):
         if not self.bot.has_space_for_loot() and not self.ignore_item_count:
@@ -55,28 +57,30 @@ class SpinFort(BaseTask):
             if spin_result == 1:
                 self.bot.softban = False
                 experience_awarded = spin_details.get('experience_awarded', 0)
-                items_awarded = spin_details.get('items_awarded', {})
+                items_awarded = spin_details.get('items_awarded', False)
                 if items_awarded:
                     self.bot.latest_inventory = None
                     tmp_count_items = {}
                     for item in items_awarded:
                         item_id = item['item_id']
                         item_name = self.bot.item_list[str(item_id)]
-                        if not item_name in tmp_count_items:
-                            tmp_count_items[item_name] = item['item_count']
+                        if not item_id in tmp_count_items:
+                            tmp_count_items[item_id] = item['item_count']
                         else:
-                            tmp_count_items[item_name] += item['item_count']
+                            tmp_count_items[item_id] += item['item_count']
 
                 if experience_awarded or items_awarded:
                     self.emit_event(
                         'spun_pokestop',
-                        formatted="Spun pokestop {pokestop}. Experience awarded: {exp}. Items awarded: {items}",
+                        formatted="Spun pokestop {pokestop}. Experience awarded: {exp}. Items awarded:",
                         data={
                             'pokestop': fort_name,
-                            'exp': experience_awarded,
-                            'items': tmp_count_items
+                            'exp': experience_awarded
                         }
                     )
+                    for item_id, item_count in tmp_count_items.iteritems():
+                        item_name = self.bot.item_list[str(item_id)]
+                        self.logger.info('\033[96m- ' + str(item_count) + "x " + item_name + " (Total: " + str(self.bot.item_inventory_count(item_id)) + ")\033[0;0m")
                 else:
                     self.emit_event(
                         'pokestop_empty',
