@@ -112,7 +112,7 @@ class ColoredLoggingHandler(EventHandler):
         formatted_msg = '{}{}{}'.format(color, formatted_msg, self.COLOR_CODE['reset'])
 
         if formatted_msg:
-            message = "[{}] {}".format(event, formatted_msg)
+            message = "{}".format(formatted_msg)
         else:
-            message = '{}: {}'.format(event, str(data))
+            message = '{}'.format(str(data))
         getattr(logger, level)(message)
