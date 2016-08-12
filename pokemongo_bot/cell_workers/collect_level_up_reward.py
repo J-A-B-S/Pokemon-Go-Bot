@@ -42,10 +42,10 @@ class CollectLevelUpReward(BaseTask):
                     .get('LEVEL_UP_REWARDS', {})
                     .get('items_awarded', []))
 
-                self.emit_event(
-                    'level_up_reward',
-                    formatted='Received level up reward:',
-                )
+            self.emit_event(
+                'level_up_reward',
+                formatted='Received level up reward:',
+            )
 
             for item in data:
                 if 'item_id' in item and str(item['item_id']) in self.bot.item_list:
