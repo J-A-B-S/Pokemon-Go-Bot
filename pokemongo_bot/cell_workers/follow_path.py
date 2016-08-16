@@ -116,6 +116,15 @@ class FollowPath(BaseTask):
             is_at_destination = False
             if step_walker.step():
                 is_at_destination = True
+                self.emit_event(
+                    'follow_path',
+                    formatted="Moving to: {latitude}, {longitude}, {altitude}",
+                    data={
+                        "latitude": str(lat),
+                        "longitude": str(lng),
+                        "altitude": str(alt)
+                    }
+                )
 
         else:
             self.bot.api.set_position(lat, lng, alt)

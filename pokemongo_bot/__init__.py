@@ -455,6 +455,10 @@ class PokemonGoBot(object):
             'move_to_map_pokemon_teleport_back',
             parameters=('last_lat', 'last_lon')
         )
+        self.event_manager.register_event(
+            'follow_path',
+            parameters=('latitude', 'longitude', 'altitude')
+        )
 
     def tick(self):
         self.health_record.heartbeat()
