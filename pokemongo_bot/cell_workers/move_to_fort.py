@@ -81,7 +81,8 @@ class MoveToFort(BaseTask):
                 self.bot,
                 self.bot.config.walk,
                 lat,
-                lng
+                lng,
+                0.0
             )
 
             if not step_walker.step():

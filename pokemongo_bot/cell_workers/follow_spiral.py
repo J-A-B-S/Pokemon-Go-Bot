@@ -74,7 +74,8 @@ class FollowSpiral(BaseTask):
                 self.bot,
                 self.bot.config.walk,
                 point['lat'],
-                point['lng']
+                point['lng'],
+                0.0
             )
 
             dist = distance(

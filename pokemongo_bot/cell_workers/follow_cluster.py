@@ -60,7 +60,8 @@ class FollowCluster(BaseTask):
                         self.bot,
                         self.bot.config.walk,
                         lat,
-                        lng
+                        lng,
+                        0.0
                     )
 
                     self.is_at_destination = False
