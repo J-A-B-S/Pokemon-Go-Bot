@@ -367,6 +367,6 @@ class MoveToMapPokemon(BaseTask):
             self.bot,
             self.bot.config.walk,
             pokemon['latitude'],
-            pokemon['longitude']
+            pokemon['longitude'],
             0.0
         )
