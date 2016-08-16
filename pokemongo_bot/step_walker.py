@@ -44,7 +44,7 @@ class StepWalker(object):
             self.bot.event_manager.emit(
                 'position_update',
                 sender=self,
-                level='info',
+                level='debug',
                 data={
                     'current_position': (self.destLat, self.destLng),
                     'last_position': (self.initLat, self.initLng),
