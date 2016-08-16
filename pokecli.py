@@ -425,6 +425,15 @@ def init_config():
         type=float,
         default=1
     )
+    add_config(
+        parser,
+        load,
+        short_flag="-alt",
+        long_flag="--altitude",
+        help="Define starting altitude",
+        type=float,
+        default=0.0
+    )
 
     # Start to parse other attrs
     config = parser.parse_args()
@@ -438,6 +447,7 @@ def init_config():
     config.release = load.get('release', {})
     config.action_wait_max = load.get('action_wait_max', 4)
     config.action_wait_min = load.get('action_wait_min', 1)
+    config.altitude = load.get('altitude', 0.0)
     config.plugins = load.get('plugins', [])
     config.raw_tasks = load.get('tasks', [])
 

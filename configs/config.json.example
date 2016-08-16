@@ -3,6 +3,7 @@
     "username": "YOUR_USERNAME",
     "password": "YOUR_PASSWORD",
     "location": "SOME_LOCATION",
+    "altitude": "0.0",
     "gmapkey": "GOOGLE_MAPS_API_KEY",
     "libencrypt_location": "",
     "tasks": [

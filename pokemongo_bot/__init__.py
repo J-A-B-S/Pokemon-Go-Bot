@@ -922,7 +922,7 @@ class PokemonGoBot(object):
                 location = (
                     location_json['lat'],
                     location_json['lng'],
-                    0.0
+                    self.config.altitude
                 )
 
                 # If location has been set in config, only use cache if starting position has not differed
@@ -968,6 +968,7 @@ class PokemonGoBot(object):
                 )
 
     def get_pos_by_name(self, location_name):
+    	elevation = self.config.altitude
         # Check if the given location is already a coordinate.
         if ',' in location_name:
             possible_coordinates = re.findall(
@@ -980,7 +981,7 @@ class PokemonGoBot(object):
                     '[x] Coordinates found in passed in location, '
                     'not geocoding.'
                 )
-                return float(possible_coordinates[0]), float(possible_coordinates[1]), float("0.0")
+                return float(possible_coordinates[0]), float(possible_coordinates[1]), float(elevation)
 
         geolocator = GoogleV3(api_key=self.config.gmapkey)
         loc = geolocator.geocode(location_name, timeout=10)
