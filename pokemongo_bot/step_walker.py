@@ -7,9 +7,10 @@ from human_behaviour import random_lat_long_delta, sleep
 
 class StepWalker(object):
 
-    def __init__(self, bot, speed, dest_lat, dest_lng):
+    def __init__(self, bot, speed, dest_lat, dest_lng, altitude):
         self.bot = bot
         self.api = bot.api
+        self.altitude = 0
 
         self.initLat, self.initLng = self.bot.position[0:2]
 
@@ -39,11 +40,11 @@ class StepWalker(object):
 
     def step(self):
         if (self.dLat == 0 and self.dLng == 0) or self.dist < self.speed:
-            self.api.set_position(self.destLat, self.destLng, 0)
+            self.api.set_position(self.destLat, self.destLng, self.altitude)
             self.bot.event_manager.emit(
                 'position_update',
                 sender=self,
-                level='debug',
+                level='info',
                 data={
                     'current_position': (self.destLat, self.destLng),
                     'last_position': (self.initLat, self.initLng),
@@ -51,6 +52,7 @@ class StepWalker(object):
                     'distance_unit': ''
                 }
             )
+
             self.bot.heartbeat()
             return True
 

@@ -69,7 +69,7 @@ class FollowPath(BaseTask):
         track = gpx.tracks[0]
         for segment in track.segments:
             for point in segment.points:
-                points.append({"lat": point.latitude, "lng": point.longitude})
+                points.append({"lat": point.latitude, "lng": point.longitude, "alt": point.elevation})
 
         return points
 
@@ -83,6 +83,7 @@ class FollowPath(BaseTask):
             botlng = self.bot.api._position_lng
             lat = float(point['lat'])
             lng = float(point['lng'])
+            alt = point['alt']
             
             dist = distance(
                 botlat,
@@ -101,13 +102,15 @@ class FollowPath(BaseTask):
         point = self.points[self.ptr]
         lat = float(point['lat'])
         lng = float(point['lng'])
+        alt = point['alt']
 
         if self.bot.config.walk > 0:
             step_walker = StepWalker(
                 self.bot,
                 self.bot.config.walk,
                 lat,
-                lng
+                lng,
+                alt
             )
 
             is_at_destination = False
@@ -115,7 +118,7 @@ class FollowPath(BaseTask):
                 is_at_destination = True
 
         else:
-            self.bot.api.set_position(lat, lng)
+            self.bot.api.set_position(lat, lng, alt)
 
         dist = distance(
             self.bot.api._position_lat,
