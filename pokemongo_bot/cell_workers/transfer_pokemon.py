@@ -10,10 +10,6 @@ from pokemongo_bot.inventory import Pokemons
 class TransferPokemon(BaseTask):
     SUPPORTED_TASK_API_VERSION = 1
 
-    def initialize(self):
-        self.transfer_wait_min = self.config.get('transfer_wait_min', 1)
-        self.transfer_wait_max = self.config.get('transfer_wait_max', 4)
-
     def work(self):
         pokemon_groups = self._release_pokemon_get_groups()
         for pokemon_id, group in pokemon_groups.iteritems():
@@ -160,7 +156,7 @@ class TransferPokemon(BaseTask):
                 'iv': pokemon.iv
             }
         )
-        action_delay(self.transfer_wait_min, self.transfer_wait_max)
+        action_delay(self.bot.config.action_wait_min, self.bot.config.action_wait_max)
 
     def _get_release_config_for(self, pokemon):
         release_config = self.bot.config.release.get(pokemon)
