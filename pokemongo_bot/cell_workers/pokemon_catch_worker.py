@@ -93,15 +93,15 @@ class PokemonCatchWorker(BaseTask):
 
         # skip ignored pokemon
         if not self._should_catch_pokemon(pokemon):
-            return WorkerResult.SUCCESS
+            return WorkerResult.SUCCESS  
 
         is_vip = self._is_vip_pokemon(pokemon)
-        if pokeballs or superballs or ultraballs < 1:
-            self.emit_event('no_pokeballs', formatted='No usable pokeballs found!')
-            return WorkerResult.SUCCESS
-        if not is_vip:
-            self.emit_event('no_pokeballs', formatted='No usable pokeballs found!')
-            return WorkerResult.SUCCESS
+        if pokeballs < 1:
+            if superballs < 1:
+                if ultraballs < 1:
+                      return WorkerResult.SUCCESS
+                if not is_vip:
+                      return WorkerResult.SUCCESS   
 
         # log encounter
         self.emit_event(
@@ -117,7 +117,7 @@ class PokemonCatchWorker(BaseTask):
                 'longitude': self.pokemon['longitude'],
                 'pokemon_id': pokemon.num
             }
-        )
+        )  
 
         # simulate app
         action_delay(self.config.catchsim_catch_wait_min, self.config.catchsim_catch_wait_max)
