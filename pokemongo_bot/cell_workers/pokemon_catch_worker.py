@@ -96,12 +96,12 @@ class PokemonCatchWorker(BaseTask):
             return WorkerResult.SUCCESS
 
         is_vip = self._is_vip_pokemon(pokemon)
-        if pokeballs < 1:
-            if superballs < 1:
-                if ultraballs < 1:
-                    return WorkerResult.SUCCESS
-                if not is_vip:
-                    return WorkerResult.SUCCESS
+        if pokeballs or superballs or ultraballs < 1:
+            self.emit_event('no_pokeballs', formatted='No usable pokeballs found!')
+            return WorkerResult.SUCCESS
+        if not is_vip:
+            self.emit_event('no_pokeballs', formatted='No usable pokeballs found!')
+            return WorkerResult.SUCCESS
 
         # log encounter
         self.emit_event(
@@ -283,8 +283,6 @@ class PokemonCatchWorker(BaseTask):
             current_ball = ITEM_POKEBALL
             while items_stock[current_ball] == 0 and current_ball < maximum_ball:
                 current_ball += 1
-            if items_stock[current_ball] == 0:
-                self.emit_event('no_pokeballs', formatted='No usable pokeballs found!')
                 break
 
             # check future ball count
