@@ -465,6 +465,8 @@ def init_config():
     config.altitude = load.get('altitude', 0.0)
     config.plugins = load.get('plugins', [])
     config.raw_tasks = load.get('tasks', [])
+    config.recycle_wait_min = load.get('recycle_wait_min', 1)
+    config.recycle_wait_max = load.get('recycle_wait_max', 4)
 
     catchsim_config = load.get('catch_simulation', {})
     config.catchsim_catch_wait_min = catchsim_config.get('catch_wait_min', 2)
