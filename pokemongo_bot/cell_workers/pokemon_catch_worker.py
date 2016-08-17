@@ -10,6 +10,7 @@ from pokemongo_bot.worker_result import WorkerResult
 CATCH_STATUS_SUCCESS = 1
 CATCH_STATUS_FAILED = 2
 CATCH_STATUS_VANISHED = 3
+CATCH_STATUS_MISSED = 4
 
 ENCOUNTER_STATUS_SUCCESS = 1
 ENCOUNTER_STATUS_NOT_IN_RANGE = 5
@@ -108,7 +109,7 @@ class PokemonCatchWorker(BaseTask):
         )
 
         # simulate app
-        sleep(3)
+        action_delay(self.config.catchsim_catch_wait_min, self.config.catchsim_catch_wait_max)
 
         # check for VIP pokemon
         is_vip = self._is_vip_pokemon(pokemon)
@@ -121,7 +122,7 @@ class PokemonCatchWorker(BaseTask):
         self._do_catch(pokemon, encounter_id, catch_rate_by_ball, is_vip=is_vip)
 
         # simulate app
-        time.sleep(5)
+        action_delay(self.config.catchsim_catch_wait_min, self.config.catchsim_catch_wait_max)
 
     def create_encounter_api_call(self):
         encounter_id = self.pokemon['encounter_id']
@@ -261,6 +262,7 @@ class PokemonCatchWorker(BaseTask):
         berry_id = ITEM_RAZZBERRY
         maximum_ball = ITEM_ULTRABALL if is_vip else ITEM_GREATBALL
         ideal_catch_rate_before_throw = 0.9 if is_vip else 0.35
+        hit_rate = self.config.catch_throw_parameters_hit_rate
 
         berry_count = self.bot.item_inventory_count(berry_id)
         items_stock = self.bot.current_inventory()
@@ -335,12 +337,16 @@ class PokemonCatchWorker(BaseTask):
                 }
             )
 
+            hit_pokemon = 1
+            if random() >= hit_rate:
+                hit_pokemon = 0
+
             response_dict = self.api.catch_pokemon(
                 encounter_id=encounter_id,
                 pokeball=current_ball,
                 normalized_reticle_size=throw_parameters['normalized_reticle_size'],
                 spawn_point_id=self.spawn_point_guid,
-                hit_pokemon=1,
+                hit_pokemon=hit_pokemon,
                 spin_modifier=throw_parameters['spin_modifier'],
                 normalized_hit_position=throw_parameters['normalized_hit_position']
             )
@@ -410,7 +416,19 @@ class PokemonCatchWorker(BaseTask):
 
                 self.bot.softban = False
 
+            elif catch_pokemon_status == CATCH_STATUS_MISSED:
+                self.emit_event(
+                    'pokemon_capture_failed',
+                    formatted='Pokeball thrown to {pokemon} missed.. trying again!',
+                    data={'pokemon': pokemon.name}
+                )
+                sleep(self.generate_random_sleep_time(3))
+                continue
+
             break
+            
+    def generate_random_sleep_time(self, time):
+        return int(time * random() + 0.3)
 
     def generate_spin_parameter(self, throw_parameters):
         spin_success_rate = self.config.catch_throw_parameters_spin_success_rate

@@ -442,6 +442,15 @@ def init_config():
         type=int,
         default=10
     )
+    add_config(
+        parser,
+        load,
+        short_flag="-cth",
+        long_flag="--catch_throw_parameters.hit_rate",
+        help="Define the odd of performing a normal throw",
+        type=float,
+        default=0.70
+    )
 
     # Start to parse other attrs
     config = parser.parse_args()
