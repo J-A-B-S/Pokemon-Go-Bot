@@ -269,6 +269,8 @@ class PokemonGoBot(object):
         self.event_manager.register_event(
             'threw_pokeball',
             parameters=(
+                'throw_type',
+                'spin_type',
                 'ball_name',
                 'success_percentage',
                 'count_left'
