@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import time
-from random import random, randrange
+from random import random, randrange, uniform, randint
 from pokemongo_bot import inventory
 from pokemongo_bot.base_task import BaseTask
 from pokemongo_bot.human_behaviour import sleep, action_delay
@@ -472,26 +472,26 @@ class PokemonCatchWorker(BaseTask):
 
         if random_throw <= throw_excellent_chance:
             throw_parameters['normalized_reticle_size'] = 1.70 + 0.25 * random()
-            throw_parameters['normalized_hit_position'] = 1.0
+            throw_parameters['normalized_hit_position'] = randint(0,1)
             throw_parameters['throw_type_label'] = 'excellent'
             return
 
         random_throw -= throw_excellent_chance
         if random_throw <= throw_great_chance:
             throw_parameters['normalized_reticle_size'] = 1.30 + 0.399 * random()
-            throw_parameters['normalized_hit_position'] = 1.0
+            throw_parameters['normalized_hit_position'] = randint(0,1)
             throw_parameters['throw_type_label'] = 'great'
             return
 
         random_throw -= throw_great_chance
         if random_throw <= throw_nice_chance:
             throw_parameters['normalized_reticle_size'] = 1.00 + 0.299 * random()
-            throw_parameters['normalized_hit_position'] = 1.0
+            throw_parameters['normalized_hit_position'] = randint(0,1)
             throw_parameters['throw_type_label'] = 'nice'
             return
 
         # Not a any kind of special throw, let's throw a normal one
         # Here the reticle size doesn't matter, we scored out of it
         throw_parameters['normalized_reticle_size'] = 1.25 + 0.70 * random()
-        throw_parameters['normalized_hit_position'] = 0.0
+        throw_parameters['normalized_hit_position'] = randint(0,1)
         throw_parameters['throw_type_label'] = 'ok'
