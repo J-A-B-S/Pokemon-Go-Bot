@@ -346,8 +346,10 @@ class PokemonCatchWorker(BaseTask):
             action_delay(self.catchsim_catch_wait_min, self.catchsim_catch_wait_max)
             self.emit_event(
                 'threw_pokeball',
-                formatted='Used {ball_name}, with chance {success_percentage} ({count_left} left)',
+                formatted='Throwing {throw_type} {spin_type} using {ball_name}, with chance {success_percentage} ({count_left} left)',
                 data={
+                    'throw_type': throw_parameters['throw_type_label'],
+                    'spin_type': throw_parameters['spin_type_label'],
                     'ball_name': self.item_list[str(current_ball)],
                     'success_percentage': self._pct(catch_rate_by_ball[current_ball]),
                     'count_left': items_stock[current_ball]
@@ -380,8 +382,8 @@ class PokemonCatchWorker(BaseTask):
                     formatted='{pokemon} capture failed.. trying again!',
                     data={'pokemon': pokemon.name}
                 )
-                if self.config.catchsim_flee_count:
-                    sleep((randrange(self.config.catchsim_flee_count)+1) * self.config.catchsim_flee_duration)
+                if self.catchsim_flee_count:
+                    sleep((randrange(self.catchsim_flee_count)+1) * self.catchsim_flee_duration)
                 continue
 
             # abandon if pokemon vanished
@@ -451,8 +453,10 @@ class PokemonCatchWorker(BaseTask):
         spin_success_rate = self.catch_throw_parameters_spin_success_rate
         if random() <= spin_success_rate:
             throw_parameters['spin_modifier'] = 0.5 + 0.5 * random()
+            throw_parameters['spin_type_label'] = "curveball"
         else:
             throw_parameters['spin_modifier'] = 0.499 * random()
+            throw_parameters['spin_type_label'] = "straight ball"
 
     def generate_throw_quality_parameters(self, throw_parameters):
         throw_excellent_chance = self.catch_throw_parameters_excellent_rate
@@ -469,25 +473,25 @@ class PokemonCatchWorker(BaseTask):
         if random_throw <= throw_excellent_chance:
             throw_parameters['normalized_reticle_size'] = 1.70 + 0.25 * random()
             throw_parameters['normalized_hit_position'] = 1.0
-            throw_parameters['throw_type_label'] = 'Excellent'
+            throw_parameters['throw_type_label'] = 'excellent'
             return
 
         random_throw -= throw_excellent_chance
         if random_throw <= throw_great_chance:
             throw_parameters['normalized_reticle_size'] = 1.30 + 0.399 * random()
             throw_parameters['normalized_hit_position'] = 1.0
-            throw_parameters['throw_type_label'] = 'Great'
+            throw_parameters['throw_type_label'] = 'great'
             return
 
         random_throw -= throw_great_chance
         if random_throw <= throw_nice_chance:
             throw_parameters['normalized_reticle_size'] = 1.00 + 0.299 * random()
             throw_parameters['normalized_hit_position'] = 1.0
-            throw_parameters['throw_type_label'] = 'Nice'
+            throw_parameters['throw_type_label'] = 'nice'
             return
 
         # Not a any kind of special throw, let's throw a normal one
         # Here the reticle size doesn't matter, we scored out of it
         throw_parameters['normalized_reticle_size'] = 1.25 + 0.70 * random()
         throw_parameters['normalized_hit_position'] = 0.0
-        throw_parameters['throw_type_label'] = 'Normal'
+        throw_parameters['throw_type_label'] = 'ok'
