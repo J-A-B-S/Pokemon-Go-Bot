@@ -79,6 +79,7 @@ class PokemonGoBot(object):
         self.web_update_queue = Queue.Queue(maxsize=1)
         self.web_update_thread = threading.Thread(target=self.update_web_location_worker)
         self.web_update_thread.start()
+        self.elevation = self.config.altitude
         self.heartbeat_threshold = self.config.heartbeat_threshold
         self.heartbeat_counter = 0
         self.last_heartbeat = time.time()
@@ -902,7 +903,7 @@ class PokemonGoBot(object):
                 level='info',
                 formatted="Now at {current_position}",
                 data={
-                    'current_position': self.position,
+                    'current_position': location,
                     'last_position': '',
                     'distance': '',
                     'distance_unit': ''
@@ -929,7 +930,7 @@ class PokemonGoBot(object):
                 location = (
                     location_json['lat'],
                     location_json['lng'],
-                    self.config.altitude
+                    self.elevation
                 )
 
                 # If location has been set in config, only use cache if starting position has not differed
@@ -975,7 +976,6 @@ class PokemonGoBot(object):
                 )
 
     def get_pos_by_name(self, location_name):
-        elevation = self.config.altitude
         # Check if the given location is already a coordinate.
         if ',' in location_name:
             possible_coordinates = re.findall(
@@ -988,7 +988,7 @@ class PokemonGoBot(object):
                     '[x] Coordinates found in passed in location, '
                     'not geocoding.'
                 )
-                return float(possible_coordinates[0]), float(possible_coordinates[1]), float(elevation)
+                return float(possible_coordinates[0]), float(possible_coordinates[1]), float(self.elevation)
 
         geolocator = GoogleV3(api_key=self.config.gmapkey)
         loc = geolocator.geocode(location_name, timeout=10)

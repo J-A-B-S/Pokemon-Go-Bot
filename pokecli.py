@@ -383,7 +383,6 @@ def init_config():
     add_config(
         parser,
         load,
-        short_flag="-alt",
         long_flag="--altitude",
         help="Define starting altitude",
         type=float,
@@ -417,7 +416,6 @@ def init_config():
     config.encrypt_location = load.get('encrypt_location',  '')
     config.catch = load.get('catch', {})
     config.release = load.get('release', {})
-    config.altitude = load.get('altitude', 0.0)
     config.plugins = load.get('plugins', [])
     config.raw_tasks = load.get('tasks', [])
     config.recycle_wait_min = load.get('recycle_wait_min', 1)
