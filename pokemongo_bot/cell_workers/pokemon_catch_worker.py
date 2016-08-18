@@ -64,6 +64,7 @@ class PokemonCatchWorker(BaseTask):
         self.min_ultraball_to_keep = config.get('min_ultraball_to_keep', 10)
         
         self.catch_throw_parameters = config.get('catch_throw_parameters', {})
+        self.catch_throw_parameters_hit_rate = self.catch_throw_parameters.get('hit_rate', 0.70)
         self.catch_throw_parameters_spin_success_rate = self.catch_throw_parameters.get('spin_success_rate', 0.6)
         self.catch_throw_parameters_excellent_rate = self.catch_throw_parameters.get('excellent_rate', 0.1)
         self.catch_throw_parameters_great_rate = self.catch_throw_parameters.get('great_rate', 0.5)
@@ -128,7 +129,7 @@ class PokemonCatchWorker(BaseTask):
         )  
 
         # simulate app
-        action_delay(self.catchsim_catch_wait_min, self.catchsim_catch_wait_max)
+        time.sleep(3)
 
         # check for VIP pokemon
         is_vip = self._is_vip_pokemon(pokemon)
@@ -281,7 +282,6 @@ class PokemonCatchWorker(BaseTask):
         berry_id = ITEM_RAZZBERRY
         maximum_ball = ITEM_ULTRABALL if is_vip else ITEM_GREATBALL
         ideal_catch_rate_before_throw = 0.9 if is_vip else 0.35
-        hit_rate = self.config.catch_throw_parameters_hit_rate
 
         berry_count = self.bot.item_inventory_count(berry_id)
         items_stock = self.bot.current_inventory()
@@ -355,7 +355,7 @@ class PokemonCatchWorker(BaseTask):
             )
 
             hit_pokemon = 1
-            if random() >= hit_rate:
+            if random() >= self.catch_throw_parameters_hit_rate:
                 hit_pokemon = 0
 
             response_dict = self.api.catch_pokemon(
@@ -439,7 +439,7 @@ class PokemonCatchWorker(BaseTask):
                     formatted='Pokeball thrown to {pokemon} missed.. trying again!',
                     data={'pokemon': pokemon.name}
                 )
-                sleep(self.generate_random_sleep_time(3))
+                action_delay(self.catchsim_catch_wait_min, self.catchsim_catch_wait_max)
                 continue
 
             break
