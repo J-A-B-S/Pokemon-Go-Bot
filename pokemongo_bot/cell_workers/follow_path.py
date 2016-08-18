@@ -83,7 +83,6 @@ class FollowPath(BaseTask):
             botlng = self.bot.api._position_lng
             lat = float(point['lat'])
             lng = float(point['lng'])
-            alt = point['alt']
             
             dist = distance(
                 botlat,
@@ -115,7 +114,6 @@ class FollowPath(BaseTask):
 
             is_at_destination = False
             if step_walker.step():
-                is_at_destination = True
                 self.emit_event(
                     'follow_path',
                     formatted="Moving to: {latitude}, {longitude}, {altitude}",
@@ -125,6 +123,7 @@ class FollowPath(BaseTask):
                         "altitude": str(alt)
                     }
                 )
+                is_at_destination = True
 
         else:
             self.bot.api.set_position(lat, lng, alt)
