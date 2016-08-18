@@ -6,8 +6,6 @@ from pokemongo_bot import inventory
 from pokemongo_bot.base_task import BaseTask
 from pokemongo_bot.human_behaviour import sleep, action_delay
 from pokemongo_bot.worker_result import WorkerResult
-from pokemongo_bot.item_list import Item
-from pokemongo_bot import inventory
 
 CATCH_STATUS_SUCCESS = 1
 CATCH_STATUS_FAILED = 2
@@ -50,7 +48,7 @@ class Pokemon(object):
 
 class PokemonCatchWorker(BaseTask):
 
-    def __init__(self, pokemon, bot):
+    def __init__(self, pokemon, bot, config):
         self.pokemon = pokemon
         self.api = bot.api
         self.bot = bot
@@ -62,6 +60,25 @@ class PokemonCatchWorker(BaseTask):
         self.spawn_point_guid = ''
         self.response_key = ''
         self.response_status_key = ''
+
+        self.min_ultraball_to_keep = config.get('min_ultraball_to_keep', 10)
+        
+        self.catch_throw_parameters = config.get('catch_throw_parameters', {})
+        self.catch_throw_parameters_spin_success_rate = self.catch_throw_parameters.get('spin_success_rate', 0.6)
+        self.catch_throw_parameters_excellent_rate = self.catch_throw_parameters.get('excellent_rate', 0.1)
+        self.catch_throw_parameters_great_rate = self.catch_throw_parameters.get('great_rate', 0.5)
+        self.catch_throw_parameters_nice_rate = self.catch_throw_parameters.get('nice_rate', 0.3)
+        self.catch_throw_parameters_normal_rate = self.catch_throw_parameters.get('normal_rate', 0.1)
+
+        self.catchsim_config = config.get('catch_simulation', {})
+        self.catchsim_catch_wait_min = self.catchsim_config.get('catch_wait_min', 2)
+        self.catchsim_catch_wait_max = self.catchsim_config.get('catch_wait_max', 6)
+        self.catchsim_flee_count = int(self.catchsim_config.get('flee_count', 3))
+        self.catchsim_flee_duration = self.catchsim_config.get('flee_duration', 2)
+        self.catchsim_berry_wait_min = self.catchsim_config.get('berry_wait_min', 2)
+        self.catchsim_berry_wait_max = self.catchsim_config.get('berry_wait_max', 3)
+        self.catchsim_changeball_wait_min = self.catchsim_config.get('changeball_wait_min', 2)
+        self.catchsim_changeball_wait_max = self.catchsim_config.get('changeball_wait_max', 3)
 
     ############################################################################
     # public methods
@@ -110,15 +127,11 @@ class PokemonCatchWorker(BaseTask):
             }
         )  
 
-        if sum([inventory.items().get(ball.value).count for ball in 
-            [Item.ITEM_POKE_BALL, Item.ITEM_GREAT_BALL, Item.ITEM_ULTRA_BALL]]) <= 0:
-            self.emit_event('no_pokeballs', formatted='No usable pokeballs found!')
-            return WorkerResult.ERROR
-
         # simulate app
-        action_delay(self.config.catchsim_catch_wait_min, self.config.catchsim_catch_wait_max)
+        action_delay(self.catchsim_catch_wait_min, self.catchsim_catch_wait_max)
 
         # check for VIP pokemon
+        is_vip = self._is_vip_pokemon(pokemon)
         if is_vip:
             self.emit_event('vip_pokemon', formatted='This is a VIP pokemon. Catch!!!')
 
@@ -128,7 +141,7 @@ class PokemonCatchWorker(BaseTask):
         self._do_catch(pokemon, encounter_id, catch_rate_by_ball, is_vip=is_vip)
 
         # simulate app
-        action_delay(self.config.catchsim_catch_wait_min, self.config.catchsim_catch_wait_max)
+        action_delay(self.catchsim_catch_wait_min, self.catchsim_catch_wait_max)
 
     def create_encounter_api_call(self):
         encounter_id = self.pokemon['encounter_id']
@@ -192,19 +205,19 @@ class PokemonCatchWorker(BaseTask):
         return LOGIC_TO_FUNCTION[pokemon_config.get('logic', default_logic)](*catch_results.values())
 
     def _should_catch_pokemon(self, pokemon):
-        return self._pokemon_matches_config(self.config.catch, pokemon)
+        return self._pokemon_matches_config(self.bot.config.catch, pokemon)
 
     def _is_vip_pokemon(self, pokemon):
         # having just a name present in the list makes them vip
-        if self.config.vips.get(pokemon.name) == {}:
+        if self.bot.config.vips.get(pokemon.name) == {}:
             return True
-        return self._pokemon_matches_config(self.config.vips, pokemon, default_logic='or')
+        return self._pokemon_matches_config(self.bot.config.vips, pokemon, default_logic='or')
 
     def _pct(self, rate_by_ball):
         return '{0:.2f}'.format(rate_by_ball * 100)
 
     def _use_berry(self, berry_id, berry_count, encounter_id, catch_rate_by_ball, current_ball):
-    	action_delay(self.config.catchsim_berry_wait_min, self.config.catchsim_berry_wait_max)
+    	action_delay(self.catchsim_berry_wait_min, self.catchsim_berry_wait_max)
         new_catch_rate_by_ball = []
         self.emit_event(
             'pokemon_catch_rate',
@@ -316,7 +329,7 @@ class PokemonCatchWorker(BaseTask):
  
             # If we change ball then wait to simulate user selecting it
             if changed_ball:
-                action_delay(self.config.catchsim_changeball_wait_min, self.config.catchsim_changeball_wait_max)
+                action_delay(self.catchsim_changeball_wait_min, self.catchsim_changeball_wait_max)
 
             # Randomize the quality of the throw
             # Default structure
@@ -330,7 +343,7 @@ class PokemonCatchWorker(BaseTask):
             # try to catch pokemon!
             # TODO : Log which type of throw we selected
             items_stock[current_ball] -= 1
-            action_delay(self.config.catchsim_catch_wait_min, self.config.catchsim_catch_wait_max)
+            action_delay(self.catchsim_catch_wait_min, self.catchsim_catch_wait_max)
             self.emit_event(
                 'threw_pokeball',
                 formatted='Used {ball_name}, with chance {success_percentage} ({count_left} left)',
@@ -435,17 +448,17 @@ class PokemonCatchWorker(BaseTask):
         return int(time * random() + 0.3)
 
     def generate_spin_parameter(self, throw_parameters):
-        spin_success_rate = self.config.catch_throw_parameters_spin_success_rate
+        spin_success_rate = self.catch_throw_parameters_spin_success_rate
         if random() <= spin_success_rate:
             throw_parameters['spin_modifier'] = 0.5 + 0.5 * random()
         else:
             throw_parameters['spin_modifier'] = 0.499 * random()
 
     def generate_throw_quality_parameters(self, throw_parameters):
-        throw_excellent_chance = self.config.catch_throw_parameters_excellent_rate
-        throw_great_chance = self.config.catch_throw_parameters_great_rate
-        throw_nice_chance = self.config.catch_throw_parameters_nice_rate
-        throw_normal_throw_chance = self.config.catch_throw_parameters_normal_rate
+        throw_excellent_chance = self.catch_throw_parameters_excellent_rate
+        throw_great_chance = self.catch_throw_parameters_great_rate
+        throw_nice_chance = self.catch_throw_parameters_nice_rate
+        throw_normal_throw_chance = self.catch_throw_parameters_normal_rate
 
         # Total every chance types, pick a random number in the range and check what type of throw we got
         total_chances = throw_excellent_chance + throw_great_chance \
