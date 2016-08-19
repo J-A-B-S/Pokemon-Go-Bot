@@ -108,10 +108,9 @@ class FollowPath(BaseTask):
         last_lat = self.bot.api._position_lat
         last_lng = self.bot.api._position_lng
 
-        if self.bot.config.walk > 0:
+        if self.bot.config.walk_max > 0:
             step_walker = StepWalker(
                 self.bot,
-                self.bot.config.walk,
                 lat,
                 lng,
                 alt
@@ -140,7 +139,7 @@ class FollowPath(BaseTask):
             lng
         )
 
-        if dist <= 1 or (self.bot.config.walk > 0 and is_at_destination):
+        if dist <= 1 or (self.bot.config.walk_max > 0 and is_at_destination):
             if (self.ptr + 1) == len(self.points):
                 self.ptr = 0
                 if self.path_mode == 'linear':

@@ -7,7 +7,7 @@ from human_behaviour import random_lat_long_delta, sleep
 
 class StepWalker(object):
 
-    def __init__(self, bot, speed, dest_lat, dest_lng, altitude):
+    def __init__(self, bot, dest_lat, dest_lng, altitude):
         self.bot = bot
         self.api = bot.api
         self.altitude = 0
@@ -21,15 +21,18 @@ class StepWalker(object):
             dest_lng
         )
 
-        self.speed = speed + speed * 0.5 * ((random()*2) - 1)
+        self.speed = self.bot.config.walk_max - random() * (self.bot.config.walk_max - self.bot.config.walk_min)
 
         self.destLat = dest_lat
         self.destLng = dest_lng
         self.totalDist = max(1, self.dist)
 
-        self.steps = (self.dist + 0.0) / (speed + 0.0)
+        if self.speed == 0:
+            self.steps = 1
+        else:
+            self.steps = (self.dist + 0.0) / (self.speed + 0.0)
 
-        if self.dist < speed or int(self.steps) <= 1:
+        if self.dist < self.speed or int(self.steps) <= 1:
             self.dLat = 0
             self.dLng = 0
             self.magnitude = 0
@@ -40,7 +43,7 @@ class StepWalker(object):
 
     def step(self):
         if (self.dLat == 0 and self.dLng == 0) or self.dist < self.speed:
-            self.api.set_position(self.destLat, self.destLng, self.altitude)
+            self.api.set_position(self.destLat + random_lat_long_delta(), self.destLng + random_lat_long_delta(), self.altitude)
             self.bot.event_manager.emit(
                 'position_update',
                 sender=self,
