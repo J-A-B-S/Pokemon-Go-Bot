@@ -5,6 +5,7 @@ import gpxpy.gpx
 import json
 from pokemongo_bot.base_task import BaseTask
 from pokemongo_bot.cell_workers.utils import distance, i2f, format_dist
+from pokemongo_bot.worker_result import WorkerResult
 from pokemongo_bot.human_behaviour import sleep
 from pokemongo_bot.step_walker import StepWalker
 from pgoapi.utilities import f2i
@@ -101,7 +102,11 @@ class FollowPath(BaseTask):
         point = self.points[self.ptr]
         lat = float(point['lat'])
         lng = float(point['lng'])
-        alt = point['alt']
+        alt = float(point['alt'])
+
+        last_alt = self.bot.api._position_alt
+        last_lat = self.bot.api._position_lat
+        last_lng = self.bot.api._position_lng
 
         if self.bot.config.walk > 0:
             step_walker = StepWalker(
@@ -112,25 +117,25 @@ class FollowPath(BaseTask):
                 alt
             )
 
-            is_at_destination = False
-            if step_walker.step():
-                self.emit_event(
-                    'follow_path',
-                    formatted="Moving to: {latitude}, {longitude}, {altitude}",
-                    data={
-                        "latitude": str(lat),
-                        "longitude": str(lng),
-                        "altitude": str(alt)
-                    }
-                )
-                is_at_destination = True
+        is_at_destination = False
+        if step_walker.step():
+            is_at_destination = True
+            self.emit_event(
+            'position_update',
+            formatted="Walk to {last_position} now at {current_position}",
+            data={
+                'last_position': (lat, lng, alt),
+                'current_position': (last_lat, last_lng, last_alt)
+            }
+        )
 
         else:
             self.bot.api.set_position(lat, lng, alt)
 
+
         dist = distance(
-            self.bot.api._position_lat,
-            self.bot.api._position_lng,
+            last_lat,
+            last_lng,
             lat,
             lng
         )
