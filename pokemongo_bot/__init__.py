@@ -471,6 +471,14 @@ class PokemonGoBot(object):
         self.cell = self.get_meta_cell()
         self.tick_count += 1
 
+        now = time.time() * 1000
+
+        for fort in self.cell["forts"]:
+            timeout = fort.get("cooldown_complete_timestamp_ms", 0)
+ 
+            if timeout >= now:
+                 self.fort_timeouts[fort["id"]] = timeout
+
         # Check if session token has expired
         self.check_session(self.position[0:2])
 

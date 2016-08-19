@@ -51,8 +51,7 @@ class SpinFort(BaseTask):
             player_latitude=f2i(self.bot.position[0]),
             player_longitude=f2i(self.bot.position[1])
         )
-        if 'responses' in response_dict and \
-                'FORT_SEARCH' in response_dict['responses']:
+        if ('responses' in response_dict) and ('FORT_SEARCH' in response_dict['responses']):
 
             spin_details = response_dict['responses']['FORT_SEARCH']
             spin_result = spin_details.get('result', -1)
@@ -153,11 +152,6 @@ class SpinFort(BaseTask):
 
     def get_forts_in_range(self):
         forts = self.bot.get_forts(order_by_distance=True)
-
-        for fort in reversed(forts):
-            if 'cooldown_complete_timestamp_ms' in fort:
-                self.bot.fort_timeouts[fort["id"]] = fort['cooldown_complete_timestamp_ms']
-                forts.remove(fort)
 
         forts = filter(lambda fort: fort["id"] not in self.bot.fort_timeouts, forts)
         forts = filter(lambda fort: distance(
